@@ -15,6 +15,22 @@ jobs:
       contents: write
     steps:
       - uses: actions/checkout@v4
+      - name: Check release credentials
+        env:
+          CERTIFICATE_P12: ${{ secrets.CERTIFICATE_P12 }}
+          CERTIFICATE_PASSWORD: ${{ secrets.CERTIFICATE_PASSWORD }}
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_ID_PASSWORD: ${{ secrets.APPLE_ID_PASSWORD }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+        run: |
+          missing=0
+          for name in CERTIFICATE_P12 CERTIFICATE_PASSWORD APPLE_ID APPLE_ID_PASSWORD APPLE_TEAM_ID; do
+            if [[ -z "${!name}" ]]; then
+              echo "::error::Missing Actions secret: $name"
+              missing=1
+            fi
+          done
+          exit "$missing"
       - name: Check version is unpublished
         env:
           GH_TOKEN: ${{ github.token }}
@@ -46,6 +62,13 @@ jobs:
           if [[ -n "${KEYCHAIN_PATH:-}" && -f "$KEYCHAIN_PATH" ]]; then
             security delete-keychain "$KEYCHAIN_PATH"
           fi
+      - name: Save notarization reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: notarization-reports
+          path: dist/notary-*.json
+          if-no-files-found: ignore
       - uses: actions/upload-artifact@v4
         with:
           name: signed-release

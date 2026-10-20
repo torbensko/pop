@@ -41,7 +41,7 @@ Manual checks: toggle from another app and type immediately; navigate with arrow
 
 ## Version and artwork
 
-Settings and the menu-bar menu show the running bundle's version and build number. `MARKETING_VERSION` and `CURRENT_PROJECT_VERSION` in the Xcode project are the source of truth. Increment the build number for a new distributed build and the version for a release. The first versioned release is 1.0.0 (build 2).
+Settings and the menu-bar menu show the running bundle's version and build number. `MARKETING_VERSION` and `CURRENT_PROJECT_VERSION` in the Xcode project are the source of truth. Increment the build number for a new distributed build and the version for a release. The current version is 1.0.0 (build 3).
 
 The app icon comes from the user-designed `Artwork/pop-master.jpg`, preserved unchanged. The asset catalogue contains PNG exports at macOS icon sizes; the website uses the same master artwork.
 
@@ -52,3 +52,12 @@ The app icon comes from the user-designed `Artwork/pop-master.jpg`, preserved un
 The manual **Build and release** GitHub workflow signs, notarises, staples, and publishes a DMG, ZIP, and checksums. Before running it, configure the same five repository Actions secrets used by Brief: `CERTIFICATE_P12`, `CERTIFICATE_PASSWORD`, `APPLE_ID`, `APPLE_ID_PASSWORD`, and `APPLE_TEAM_ID`. The certificate must be a Developer ID Application certificate. GitHub does not allow reading existing secret values back from another repository.
 
 Local distribution packaging accepts those Apple credentials plus `SIGNING_IDENTITY` through environment variables. Keep credentials out of source and shell history. The release workflow refuses to replace an existing version.
+
+### First release setup
+
+1. Add the five secrets above under **Settings → Secrets and variables → Actions → Secrets** in the Pop repository. Use the original signing certificate and credentials from Brief; its repository secrets do not carry over automatically. `CERTIFICATE_P12` is the base64-encoded exported certificate, and `CERTIFICATE_PASSWORD` unlocks that export. `APPLE_ID_PASSWORD` is an Apple app-specific password.
+2. No Actions variables are required. The default runner is `xcode-27`, matching Brief's successful release. Set the optional `MACOS_RUNNER` variable only if you need to change the runner.
+3. Open **Actions → Build and release → Run workflow**, select `main`, and run it. Publishing is manual, not triggered by a push.
+4. After the run succeeds, the public release provides `Pop.dmg`, `Pop.zip`, and `SHA256SUMS.txt`. The stable download URL is `https://github.com/torbensko/pop/releases/latest/download/Pop.dmg`. Add this as the website entry's `downloadUrl` once the first release exists.
+
+For subsequent releases, increment the version and build number in the Xcode project and update `RELEASE_NOTES.md` before running the workflow.
