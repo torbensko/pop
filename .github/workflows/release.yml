@@ -1,0 +1,62 @@
+name: Build and release
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: public-release
+  cancel-in-progress: false
+jobs:
+  release:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ${{ vars.MACOS_RUNNER || 'xcode-27' }}
+    timeout-minutes: 90
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check version is unpublished
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          VERSION="$(sed -n 's/.*MARKETING_VERSION = \([^;]*\);/\1/p' Pop.xcodeproj/project.pbxproj | sort -u)"
+          [[ "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]] || exit 1
+          echo "RELEASE_VERSION=$VERSION" >> "$GITHUB_ENV"
+          gh release list --limit 1000 --json tagName > /tmp/pop-releases.json
+          VERSION="$VERSION" python3 - <<'PY'
+          import json, os
+          if any(r['tagName'] == 'v' + os.environ['VERSION'] for r in json.load(open('/tmp/pop-releases.json'))):
+              raise SystemExit('Release already exists; increment MARKETING_VERSION.')
+          PY
+      - run: ./Scripts/check.sh
+      - name: Import Developer ID certificate
+        env:
+          CERTIFICATE_P12: ${{ secrets.CERTIFICATE_P12 }}
+          CERTIFICATE_PASSWORD: ${{ secrets.CERTIFICATE_PASSWORD }}
+        run: ./Scripts/import-signing-certificate.sh
+      - name: Package and notarize
+        env:
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_ID_PASSWORD: ${{ secrets.APPLE_ID_PASSWORD }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+        run: ./Scripts/package.sh
+      - name: Remove temporary keychain
+        if: always()
+        run: |
+          if [[ -n "${KEYCHAIN_PATH:-}" && -f "$KEYCHAIN_PATH" ]]; then
+            security delete-keychain "$KEYCHAIN_PATH"
+          fi
+      - uses: actions/upload-artifact@v4
+        with:
+          name: signed-release
+          path: |
+            dist/Pop.dmg
+            dist/Pop.zip
+            dist/SHA256SUMS.txt
+          if-no-files-found: error
+      - name: Publish verified release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "v$RELEASE_VERSION" dist/Pop.dmg dist/Pop.zip dist/SHA256SUMS.txt \
+            --target "$GITHUB_SHA" --title "Pop $RELEASE_VERSION" --notes-file RELEASE_NOTES.md
