@@ -4,7 +4,13 @@ import Combine
 @MainActor
 final class LauncherModel: ObservableObject {
     @Published var roots: [FolderRoot] = []
-    @Published var query = "" { didSet { filter() } }
+    @Published var query = "" {
+        didSet {
+            // TextField can commit the same text again on Return. Keep the
+            // highlighted result unless the search text actually changed.
+            if query != oldValue { filter() }
+        }
+    }
     @Published var results: [Item] = []
     @Published var selection = 0
     @Published var indexing = false
@@ -12,15 +18,18 @@ final class LauncherModel: ObservableObject {
     @Published var focusToken = UUID()
     private var items: [Item] = []
     private var generation = 0
-    private let configURL = URL.applicationSupportDirectory.appending(path: "Pop/config.json")
+    private let configURL: URL
     private struct Config: Codable { var folders: [FolderRoot] }
 
-    private var usage = UsageStore(url: URL.applicationSupportDirectory.appending(path: "Pop/usage.json"))
+    private var usage: UsageStore
     @Published private var usageWarning: String?
     var isShowingSuggestions: Bool { query.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty }
     var statusMessage: String? { [message, usageWarning].compactMap { $0 }.joined(separator: "\n").nilIfEmpty }
 
-    init() {
+    init(configURL: URL = URL.applicationSupportDirectory.appending(path: "Pop/config.json"),
+         usageURL: URL = URL.applicationSupportDirectory.appending(path: "Pop/usage.json")) {
+        self.configURL = configURL
+        usage = UsageStore(url: usageURL)
         do { try usage.load() }
         catch { usageWarning = "Could not load launch history: \(error.localizedDescription)" }
         reload()
@@ -87,10 +96,10 @@ final class LauncherModel: ObservableObject {
 
     private func filter() { results = SearchIndex.search(query, items: items, usage: usage.entries); selection = 0 }
     func move(_ delta: Int) { selection = max(0, min(results.count - 1, selection + delta)) }
-    func openSelection() -> Bool {
+    func openSelection(open: (URL) -> Bool = { NSWorkspace.shared.open($0) }) -> Bool {
         guard results.indices.contains(selection) else { return false }
         let item = results[selection]
-        guard NSWorkspace.shared.open(item.url) else { message = "Could not open \(item.name). Try reindexing."; return false }
+        guard open(item.url) else { message = "Could not open \(item.name). Try reindexing."; return false }
         do { try usage.record(item.id); usageWarning = nil }
         catch { usageWarning = "Could not save launch history: \(error.localizedDescription)" }
         return true

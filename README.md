@@ -41,7 +41,7 @@ Manual checks: toggle from another app and type immediately; navigate with arrow
 
 ## Version and artwork
 
-Settings and the menu-bar menu show the running bundle's version and build number. `MARKETING_VERSION` and `CURRENT_PROJECT_VERSION` in the Xcode project are the source of truth. Increment the build number for a new distributed build and the version for a release. The current version is 1.0.0 (build 3).
+Settings and the menu-bar menu show the running bundle's version and build number. `MARKETING_VERSION` and `CURRENT_PROJECT_VERSION` in the Xcode project are the source of truth. Increment the build number for a new distributed build and the version for a release. The current version is 1.0.1 (build 4).
 
 The app icon comes from the user-designed `Artwork/pop-master.jpg`, preserved unchanged. The asset catalogue contains PNG exports at macOS icon sizes; the website uses the same master artwork.
 

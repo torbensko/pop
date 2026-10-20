@@ -1,12 +1,6 @@
-# Pop 1.0.0
+# Pop 1.0.1
 
-A small macOS launcher for applications and folders.
+- Fix Return opening the first suggestion instead of the highlighted app or folder when the search field commits unchanged text.
+- Preserve keyboard selection when submitting an unchanged search, while starting at the first suggestion when reopening the launcher.
 
-- Search by name, abbreviation, or approximate spelling.
-- Open frequent folders and applications from quick suggestion cards.
-- Choose folder locations and the depth to search within each.
-- Calculate with `=` and copy the answer with Return.
-- Assign a global shortcut, including Command–Space once freed in macOS settings.
-- Check the running version in Settings or the menu bar menu.
-
-Requires macOS 14 or later. Launch history and settings stay on your Mac.
+Requires macOS 14 or later. Existing shortcuts, folder settings, and launch history are preserved.

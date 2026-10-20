@@ -27,6 +27,7 @@ final class PanelController {
     func hide() { panel.orderOut(nil) }
     func show() {
         model.query = ""
+        model.selection = 0
         let screen = NSScreen.screens.first { NSMouseInRect(NSEvent.mouseLocation, $0.frame, false) } ?? NSScreen.main
         if let frame = screen?.visibleFrame {
             panel.setFrameOrigin(NSPoint(x: frame.midX - panel.frame.width / 2, y: frame.midY - panel.frame.height / 2 + 80))
