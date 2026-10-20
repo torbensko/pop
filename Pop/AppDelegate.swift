@@ -13,7 +13,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         model = LauncherModel()
         launcher = PanelController(model: model)
         statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
-        statusItem.button?.image = NSImage(systemSymbolName: "magnifyingglass", accessibilityDescription: "Pop")
+        statusItem.button?.image = MenuBarIcon.make()
         let menu = NSMenu()
         let versionItem = NSMenuItem(title: "Pop · \(AppVersion.description)", action: nil, keyEquivalent: "")
         versionItem.isEnabled = false
