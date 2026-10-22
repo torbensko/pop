@@ -61,3 +61,18 @@ Local distribution packaging accepts those Apple credentials plus `SIGNING_IDENT
 4. After the run succeeds, the public release provides `Pop.dmg`, `Pop.zip`, and `SHA256SUMS.txt`. The stable download URL is `https://github.com/torbensko/pop/releases/latest/download/Pop.dmg`. Add this as the website entry's `downloadUrl` once the first release exists.
 
 For subsequent releases, increment the version and build number in the Xcode project and update `RELEASE_NOTES.md` before running the workflow.
+
+## Everyday use and development builds
+
+Use `/Applications/Pop.app` as the everyday copy. Install the exact signed, notarised app from a GitHub release—the same artifact offered by the website. Do not overwrite it with a raw Xcode build or an unsigned preview merely because a local build passed.
+
+For a fix ready for everyday use:
+
+1. Run the checks, increment the version and build number, and update the release notes.
+2. Publish through **Build and release** and wait for signing and notarisation to succeed.
+3. Download that release, check its checksums and signature, and quit the running Pop before replacing the app bundle in Applications. Replace the whole bundle rather than merging new files into an old bundle. Keep the previous release available for rollback.
+4. Launch only the Applications copy and verify its version. The website's latest-release download link follows the new release automatically.
+
+Keep the bundle identifier (`sko.Pop`) and Developer ID signing identity consistent across releases. macOS uses the app's code-signing requirements to recognise it for privacy permissions; placing an unsigned or differently signed build at the same path does not make it the same identity. A development-to-release transition may require permission again. Consistent release signing supports permission continuity, but does not guarantee that macOS will never prompt.
+
+Development builds remain separate from the everyday copy and should only be launched deliberately for testing. Stop them afterwards to avoid duplicate menu icons or shortcut conflicts. Updates must preserve the user's config, launch history, shortcut preferences, and privacy settings. Never reset permissions as part of an update.
