@@ -43,7 +43,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     @objc private func showSettings() {
         launcher.hide()
         if settings == nil {
-            let window = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 620, height: 520), styleMask: [.titled, .closable, .miniaturizable], backing: .buffered, defer: false)
+            let window = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 620, height: 620), styleMask: [.titled, .closable, .miniaturizable], backing: .buffered, defer: false)
             window.title = "Pop Settings"
             window.contentView = NSHostingView(rootView: SettingsView(model: model, updates: updates))
             window.isReleasedWhenClosed = false

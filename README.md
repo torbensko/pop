@@ -41,7 +41,7 @@ Manual checks: toggle from another app and type immediately; navigate with arrow
 
 ## Version and artwork
 
-Settings and the menu-bar menu show the running bundle's version and build number. `MARKETING_VERSION` and `CURRENT_PROJECT_VERSION` in the Xcode project are the source of truth. Increment the build number for a new distributed build and the version for a release. The current version is 1.1.0 (build 5).
+Settings and the menu-bar menu show the running bundle's version and build number. `MARKETING_VERSION` and `CURRENT_PROJECT_VERSION` in the Xcode project are the source of truth. Increment the build number for a new distributed build and the version for a release. The current version is 1.1.1 (build 6).
 
 The app icon comes from the user-designed `Artwork/pop-master.jpg`, preserved unchanged. The asset catalogue contains PNG exports at macOS icon sizes; the website uses the same master artwork.
 
@@ -84,3 +84,7 @@ Release copies installed in `/Applications/Pop.app` or `~/Applications/Pop.app` 
 The release workflow signs the final ZIP with the dedicated Sparkle key and publishes `appcast.xml` alongside the release assets. The feed references a version-specific ZIP, so a newer release cannot change the bytes behind an older signature. Keep incrementing the build number: Sparkle uses it to order updates. The public key lives in `Config/Info.plist`; the private key is in the local Keychain under the `pop-updates` account and in GitHub's `SPARKLE_PRIVATE_KEY` secret. Never commit or log the private key. Preserve this key across releases.
 
 Version 1.1.0 is the first release with an updater. Older versions need one manual installation of 1.1.0 or later. Subsequent signed releases use the in-app update path. The user can ask the agent to reopen the development build after restarting their Mac; they do not need to navigate build folders. Quit the other copy first to avoid shortcut conflicts. Development signing may have separate privacy permissions from release signing.
+
+## Start at login
+
+Enable **Start at login** in Settings to launch the installed Pop at sign-in. This uses macOS Login Items and is off until enabled. The toggle reflects the system status, including changes made in System Settings. If macOS requires approval, Pop offers a button to open Login Items. Development copies cannot register themselves. Disabling the toggle unregisters Pop without changing other preferences.

@@ -1,9 +1,9 @@
-# Pop 1.1.0
+# Pop 1.1.1
 
-- Check for updates from Pop's menu or Settings.
-- Installed release copies check on launch and download updates automatically, with preferences to turn either behaviour off.
-- Updates are verified and installed using Sparkle. Development copies do not update themselves.
+- Add **Start at login** in Settings for the installed app.
+- Show when macOS approval is needed, with a shortcut to Login Items settings.
+- Reflect changes made in macOS and report registration errors instead of silently accepting them.
 
-This is the first version with an updater. Install it once from the download; later releases can update in the app.
+Start at login remains off until you enable it. Development builds cannot register themselves.
 
-Requires macOS 14 or later. Existing shortcuts, folder settings, and launch history are preserved.
+Requires macOS 14 or later. Existing shortcuts, folders and launch history are preserved.

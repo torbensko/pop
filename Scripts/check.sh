@@ -7,4 +7,6 @@ swiftc Pop/Index.swift Pop/UsageStore.swift Pop/Calculator.swift Tests/main.swif
 "$TEST_BINARY"
 swiftc Pop/Index.swift Pop/UsageStore.swift Pop/LauncherModel.swift Tests/SelectionTests.swift -o "$TEST_BINARY"
 "$TEST_BINARY"
+swiftc Pop/LoginItem.swift Tests/LoginItemTests.swift -o "$TEST_BINARY"
+"$TEST_BINARY"
 xcodebuild -project Pop.xcodeproj -scheme Pop -configuration Release -derivedDataPath build CODE_SIGNING_ALLOWED=NO build

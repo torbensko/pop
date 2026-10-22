@@ -8,6 +8,7 @@ extension KeyboardShortcuts.Name {
 struct SettingsView: View {
     @ObservedObject var model: LauncherModel
     @ObservedObject var updates: AppUpdates
+    @StateObject private var loginItem = LoginItem()
     @State private var shortcut: KeyboardShortcuts.Shortcut? = KeyboardShortcuts.getShortcut(for: .togglePop)
     @State private var shortcutMessage: String?
     var body: some View {
@@ -34,6 +35,19 @@ struct SettingsView: View {
                 if let shortcutMessage {
                     Text(shortcutMessage).font(.caption).foregroundStyle(.secondary)
                 }
+            }
+            VStack(alignment: .leading, spacing: 6) {
+                Toggle("Start at login", isOn: Binding(get: { loginItem.isOn }, set: { loginItem.setEnabled($0) }))
+                    .disabled(!loginItem.available)
+                if !loginItem.available {
+                    Text("Available in the installed release of Pop.").font(.caption).foregroundStyle(.secondary)
+                } else if loginItem.needsApproval {
+                    HStack {
+                        Text("Allow Pop in macOS Login Items to finish enabling this.").font(.caption)
+                        Button("Open Login Items…") { loginItem.openSystemSettings() }
+                    }
+                }
+                if let error = loginItem.error { Text(error).font(.caption).foregroundStyle(.orange) }
             }
             if updates.controller != nil {
                 HStack {
@@ -73,7 +87,9 @@ struct SettingsView: View {
                 Button("Reindex") { model.reload() }
             }
             if let message = model.message { Text(message).font(.caption).foregroundStyle(.orange).lineLimit(3).help(message) }
-        }.padding(24).frame(width: 620, height: 520)
+        }.padding(24).frame(width: 620, height: 620)
+            .onAppear { loginItem.refresh() }
+            .onReceive(NotificationCenter.default.publisher(for: NSApplication.didBecomeActiveNotification)) { _ in loginItem.refresh() }
     }
 
     private func useCommandSpace() {
