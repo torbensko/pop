@@ -1,6 +1,7 @@
 import AppKit
 import SwiftUI
 import KeyboardShortcuts
+import Sparkle
 
 @MainActor
 final class AppDelegate: NSObject, NSApplicationDelegate {
@@ -8,6 +9,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private var model: LauncherModel!
     private var launcher: PanelController!
     private var settings: NSWindow?
+    private let updates = AppUpdates()
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         model = LauncherModel()
@@ -22,9 +24,14 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         add("Open Pop", action: #selector(toggle), to: menu)
         add("Settings…", action: #selector(showSettings), to: menu)
         add("Reindex", action: #selector(reindex), to: menu)
+        if let controller = updates.controller {
+            let updateItem = menu.addItem(withTitle: "Check for Updates…", action: #selector(SPUStandardUpdaterController.checkForUpdates(_:)), keyEquivalent: "")
+            updateItem.target = controller
+        }
         menu.addItem(.separator())
         menu.addItem(withTitle: "Quit Pop", action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q")
         statusItem.menu = menu
+        updates.start()
         KeyboardShortcuts.onKeyUp(for: .togglePop) { [weak self] in self?.launcher.toggle() }
     }
     private func add(_ title: String, action: Selector, to menu: NSMenu) {
@@ -36,9 +43,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     @objc private func showSettings() {
         launcher.hide()
         if settings == nil {
-            let window = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 620, height: 440), styleMask: [.titled, .closable, .miniaturizable], backing: .buffered, defer: false)
+            let window = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 620, height: 520), styleMask: [.titled, .closable, .miniaturizable], backing: .buffered, defer: false)
             window.title = "Pop Settings"
-            window.contentView = NSHostingView(rootView: SettingsView(model: model))
+            window.contentView = NSHostingView(rootView: SettingsView(model: model, updates: updates))
             window.isReleasedWhenClosed = false
             window.center()
             settings = window

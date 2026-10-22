@@ -7,6 +7,7 @@ extension KeyboardShortcuts.Name {
 
 struct SettingsView: View {
     @ObservedObject var model: LauncherModel
+    @ObservedObject var updates: AppUpdates
     @State private var shortcut: KeyboardShortcuts.Shortcut? = KeyboardShortcuts.getShortcut(for: .togglePop)
     @State private var shortcutMessage: String?
     var body: some View {
@@ -33,6 +34,17 @@ struct SettingsView: View {
                 if let shortcutMessage {
                     Text(shortcutMessage).font(.caption).foregroundStyle(.secondary)
                 }
+            }
+            if updates.controller != nil {
+                HStack {
+                    Toggle("Check for updates automatically", isOn: Binding(get: { updates.automaticChecks }, set: { updates.setAutomaticChecks($0) }))
+                    Spacer()
+                    Button("Check for Updates…") { updates.check() }.disabled(!updates.canCheck)
+                }
+                Toggle("Download updates automatically", isOn: Binding(get: { updates.automaticDownloads }, set: { updates.setAutomaticDownloads($0) }))
+                    .disabled(!updates.automaticChecks)
+            } else {
+                Text("Development build · Automatic updates are disabled").font(.caption).foregroundStyle(.secondary)
             }
             Divider()
             Text("Folder locations").font(.headline)
@@ -61,7 +73,7 @@ struct SettingsView: View {
                 Button("Reindex") { model.reload() }
             }
             if let message = model.message { Text(message).font(.caption).foregroundStyle(.orange).lineLimit(3).help(message) }
-        }.padding(24).frame(width: 620, height: 440)
+        }.padding(24).frame(width: 620, height: 520)
     }
 
     private func useCommandSpace() {

@@ -29,6 +29,13 @@ PY
 SUFFIX='-unsigned'
 if [[ "$MODE" == release ]]; then
   SUFFIX=''
+  FRAMEWORK="$APP/Contents/Frameworks/Sparkle.framework"
+  for nested in "$FRAMEWORK/Versions/B/XPCServices/Downloader.xpc" \
+                "$FRAMEWORK/Versions/B/XPCServices/Installer.xpc" \
+                "$FRAMEWORK/Versions/B/Autoupdate" \
+                "$FRAMEWORK/Versions/B/Updater.app" "$FRAMEWORK"; do
+    codesign --force --options runtime --timestamp --sign "$SIGNING_IDENTITY" "$nested"
+  done
   codesign --force --options runtime --timestamp --sign "$SIGNING_IDENTITY" "$APP"
   codesign --verify --deep --strict "$APP"
   ditto -c -k --keepParent "$APP" "$STAGE/submission.zip"
@@ -37,7 +44,15 @@ if [[ "$MODE" == release ]]; then
   xcrun stapler validate "$APP"
   spctl --assess --type execute --verbose "$APP"
 else
+  FRAMEWORK="$APP/Contents/Frameworks/Sparkle.framework"
+  for nested in "$FRAMEWORK/Versions/B/XPCServices/Downloader.xpc" \
+                "$FRAMEWORK/Versions/B/XPCServices/Installer.xpc" \
+                "$FRAMEWORK/Versions/B/Autoupdate" \
+                "$FRAMEWORK/Versions/B/Updater.app" "$FRAMEWORK"; do
+    codesign --force --sign - "$nested"
+  done
   codesign --force --sign - "$APP"
+  codesign --verify --deep --strict "$APP"
 fi
 mkdir -p "$STAGE/image"
 ditto "$APP" "$STAGE/image/Pop.app"
